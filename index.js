@@ -215,8 +215,7 @@ function renderizarTabelaDetalhada(dados) {
           <th>Data</th>
           <th>Setor</th>
           <th>Funcionário / Profissional</th>
-          <th>Entrada</th>
-          <th>Saída</th>
+          <th>Horário (Entrada / Saída)</th>
           <th class="text-right">Qtd Exames</th>
         </tr>
       </thead>
@@ -243,8 +242,10 @@ function renderizarTabelaDetalhada(dados) {
         <td>${r.data}</td>
         <td>${r.setor}</td>
         <td>${r.funcionario} ${btnObsHtml}</td>
-        <td>${horaEntrada}</td>
-        <td>${horaSaida}</td>
+        <td>
+          <div><strong>Entrada:</strong> ${horaEntrada}</div>
+          <div><strong>Saída:</strong> ${horaSaida}</div>
+        </td>
         <td class="text-right"><strong>${r.qtdExames}</strong></td>
       </tr>
     `;
