@@ -177,7 +177,6 @@ body {
   flex-direction: column;
 }
 
-/* Ajuste das etiquetas (labels) de horário para não quebrarem e caberem no celular */
 .campo-horarios-lado-a-lado .subcampo label {
   font-size: 0.75rem; 
   white-space: nowrap; 
@@ -317,6 +316,71 @@ tr:hover {
   background-color: #dd6b20;
 }
 
+/* PAGINAÇÃO DA TABELA */
+.paginacao-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e2e8f0;
+  gap: 15px;
+}
+
+.paginacao-info {
+  font-size: 0.9rem;
+  color: #4a5568;
+}
+
+.paginacao-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.paginacao-controles label {
+  font-size: 0.85rem;
+  color: #4a5568;
+}
+
+.paginacao-controles select {
+  padding: 6px 10px;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  background: white;
+  font-size: 0.9rem;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-paginacao {
+  background: #edf2f7;
+  border: 1px solid #cbd5e0;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #4a5568;
+  transition: all 0.2s;
+}
+
+.btn-paginacao:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.btn-paginacao:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#pagAtualInfo {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+
 /* MODAL (POP-UP) */
 .modal-overlay {
   display: none;
@@ -387,6 +451,7 @@ tr:hover {
 @media (max-width: 600px) {
   .grid-filtros { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .paginacao-container { flex-direction: column; align-items: flex-start; }
 }
 
 /* GRÁFICOS E BOTÕES DE TOGGLE */
@@ -510,3 +575,12 @@ body.dark-mode .modal-header {
 body.dark-mode .modal-body {
   color: #e2e8f0;
 }
+
+/* Dark mode Paginação */
+body.dark-mode .paginacao-container { border-color: #4a5568; }
+body.dark-mode .paginacao-info,
+body.dark-mode .paginacao-controles label,
+body.dark-mode #pagAtualInfo { color: #a0aec0; }
+body.dark-mode .paginacao-controles select { background: #4a5568; border-color: #718096; color: #f7fafc; }
+body.dark-mode .btn-paginacao { background: #4a5568; border-color: #718096; color: #e2e8f0; }
+body.dark-mode .btn-paginacao:hover:not(:disabled) { background: #2b6cb0; border-color: #2b6cb0; color: white; }
