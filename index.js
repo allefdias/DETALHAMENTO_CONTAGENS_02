@@ -8,8 +8,45 @@ let chartSetorInstancia = null;
 
 /* ---------------- INITIALIZATION ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
+    verificarTema(); // Carrega a preferência de Modo Escuro salva no navegador
     carregarDados();
 });
+
+/* ---------------- MODO ESCURO ---------------- */
+function verificarTema() {
+    const temaSalvo = localStorage.getItem('tema');
+    if (temaSalvo === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('btnDarkMode').innerHTML = '☀️ Claro';
+        Chart.defaults.color = '#e2e8f0'; 
+    } else {
+        Chart.defaults.color = '#666'; 
+    }
+}
+
+function toggleDarkMode() {
+    const body = document.body;
+    const btn = document.getElementById('btnDarkMode');
+    
+    body.classList.toggle('dark-mode');
+    
+    if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('tema', 'dark');
+        btn.innerHTML = '☀️ Claro';
+        Chart.defaults.color = '#e2e8f0';
+    } else {
+        localStorage.setItem('tema', 'light');
+        btn.innerHTML = '🌙 Escuro';
+        Chart.defaults.color = '#666';
+    }
+    
+    // Atualiza as cores dos gráficos instantaneamente
+    if (chartMensalInstancia) chartMensalInstancia.update();
+    if (chartSetorInstancia) {
+        chartSetorInstancia.data.datasets[0].borderColor = body.classList.contains('dark-mode') ? '#2d3748' : '#ffffff';
+        chartSetorInstancia.update();
+    }
+}
 
 /* ---------------- FETCH DATA ---------------- */
 async function carregarDados() {
@@ -29,12 +66,12 @@ async function carregarDados() {
             if (data && data.message) {
                 alert("⚠️ Erro retornado pela planilha: " + data.message);
             } else {
-                alert("⚠️ O script não retornou uma lista válida. Verifique se criou uma 'Nova Implantação' no Apps Script.");
+                alert("⚠️ O script não retornou uma lista válida.");
             }
         }
     } catch (error) {
         console.error("Erro ao buscar dados:", error);
-        alert("❌ Erro de conexão com a URL do Apps Script. Verifique se a opção 'Quem tem acesso' está definida como 'Qualquer pessoa'.");
+        alert("❌ Erro de conexão com a URL do Apps Script.");
     } finally {
         loading.style.display = "none";
         dashboard.style.display = "block";
@@ -153,7 +190,6 @@ function atualizarDashboard(dados) {
 }
 
 /* ---------------- LÓGICA DOS GRÁFICOS E TABELAS ---------------- */
-
 function alternarVisualizacao(tipo, btn) {
     const tableDiv = document.getElementById(`view${tipo}Table`);
     const chartDiv = document.getElementById(`view${tipo}Chart`);
@@ -189,7 +225,6 @@ function renderizarResumoMensal(dados) {
         return;
     }
 
-    // Montar tabela
     let html = `<table><thead><tr><th>Mês / Ano</th><th class="text-right">Qtd Exames</th></tr></thead><tbody>`;
     chaves.forEach(m => {
         html += `<tr><td>${m}</td><td class="text-right"><strong>${agrupado[m].toLocaleString("pt-BR")}</strong></td></tr>`;
@@ -197,7 +232,6 @@ function renderizarResumoMensal(dados) {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Montar gráfico
     atualizarGrafico('chartMensal', chaves, Object.values(agrupado), 'bar', 'Total de Exames');
 }
 
@@ -209,7 +243,6 @@ function renderizarResumoSetor(dados) {
         agrupado[r.setor] = (agrupado[r.setor] || 0) + r.qtdExames;
     });
 
-    // Ordenar do maior para o menor
     const chavesOrdenadas = Object.keys(agrupado).sort((a, b) => agrupado[b] - agrupado[a]);
 
     if (chavesOrdenadas.length === 0) {
@@ -218,7 +251,6 @@ function renderizarResumoSetor(dados) {
         return;
     }
 
-    // Montar tabela
     let html = `<table><thead><tr><th>Setor</th><th class="text-right">Qtd Exames</th></tr></thead><tbody>`;
     chavesOrdenadas.forEach(s => {
         html += `<tr><td>${s}</td><td class="text-right"><strong>${agrupado[s].toLocaleString("pt-BR")}</strong></td></tr>`;
@@ -226,7 +258,6 @@ function renderizarResumoSetor(dados) {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Montar gráfico
     const valores = chavesOrdenadas.map(k => agrupado[k]);
     atualizarGrafico('chartSetor', chavesOrdenadas, valores, 'doughnut', 'Exames por Setor');
 }
@@ -247,6 +278,10 @@ function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
     ];
     
     const bgColor = tipoGrafico === 'bar' ? '#3182ce' : paletaCores;
+    
+    // Cor da borda dinâmica baseado no tema atual
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const borderDynamicColor = isDarkMode ? '#2d3748' : '#ffffff';
 
     const config = {
         type: tipoGrafico,
@@ -257,7 +292,7 @@ function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
                 data: data,
                 backgroundColor: bgColor,
                 borderWidth: 1,
-                borderColor: '#ffffff',
+                borderColor: borderDynamicColor,
                 borderRadius: tipoGrafico === 'bar' ? 4 : 0
             }]
         },
@@ -281,6 +316,7 @@ function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
     }
 }
 
+/* ---------------- TABELA DETALHADA ---------------- */
 function renderizarTabelaDetalhada(dados) {
     const container = document.getElementById("tabelaDetalhadaContainer");
 
