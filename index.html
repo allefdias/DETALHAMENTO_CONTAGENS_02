@@ -11,8 +11,6 @@
 
     <!-- JS -->
     <script src="index.js" defer=""></script>
-    <script type="text/javascript" src="./index.js" defer=""></script>
-    <link rel="stylesheet" href="./index.css">
   </head>
 
   <body>
@@ -74,16 +72,16 @@
               </select>
             </div>
 
-            <!-- Horário Entrada -->
-            <div class="campo">
-              <label for="filtroEntrada">Horário Entrada:</label>
-              <input type="text" id="filtroEntrada" placeholder="Ex: 08:00">
-            </div>
-
-            <!-- Horário Saída -->
-            <div class="campo">
-              <label for="filtroSaida">Horário Saída:</label>
-              <input type="text" id="filtroSaida" placeholder="Ex: 17:00">
+            <!-- Horários Entrada e Saída Lado a Lado -->
+            <div class="campo campo-horarios-lado-a-lado">
+              <div class="subcampo">
+                <label for="filtroEntrada">Horário Entrada:</label>
+                <input type="text" id="filtroEntrada" placeholder="Ex: 08:00">
+              </div>
+              <div class="subcampo">
+                <label for="filtroSaida">Horário Saída:</label>
+                <input type="text" id="filtroSaida" placeholder="Ex: 17:00">
+              </div>
             </div>
           </div>
 
@@ -152,15 +150,13 @@
       <div class="modal-content">
         <div class="modal-header">
           <h3>💬 Observação do Plantão</h3>
-          <button class="modal-close" onclick="fecharModalObsDirect()">×</button>
+          <button class="modal-close" onclick="fecharModalObsDirect()">&times;</button>
         </div>
         <div class="modal-body">
           <p id="modalObsTexto"></p>
         </div>
       </div>
     </div>
-
-
 
   </body>
 
