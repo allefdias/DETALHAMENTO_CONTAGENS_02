@@ -2,6 +2,10 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzavzMJiuJAgZEoixPnSWQPSz-_XwE2bZgWKznjAt3b0XK9d4uiOE6n6oBhWXw2JFn5hw/exec";
 let todosRegistros = [];
 
+// Variáveis para armazenar as instâncias dos gráficos
+let chartMensalInstancia = null;
+let chartSetorInstancia = null;
+
 /* ---------------- INITIALIZATION ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
     carregarDados();
@@ -107,13 +111,11 @@ function aplicarFiltros() {
         if (setorSel && reg.setor !== setorSel) return false;
         if (funcSel && reg.funcionario !== funcSel) return false;
 
-        // Filtro por Horário de Entrada
         if (entradaSel) {
             const hEntrada = String(reg.entrada || reg.horario || "").toLowerCase();
             if (!hEntrada.includes(entradaSel)) return false;
         }
 
-        // Filtro por Horário de Saída
         if (saidaSel) {
             const hSaida = String(reg.saida || "").toLowerCase();
             if (!hSaida.includes(saidaSel)) return false;
@@ -150,15 +152,31 @@ function atualizarDashboard(dados) {
     renderizarTabelaDetalhada(dados);
 }
 
-/* ---------------- RENDERIZAR TABELAS ---------------- */
+/* ---------------- LÓGICA DOS GRÁFICOS E TABELAS ---------------- */
+
+function alternarVisualizacao(tipo, btn) {
+    const tableDiv = document.getElementById(`view${tipo}Table`);
+    const chartDiv = document.getElementById(`view${tipo}Chart`);
+
+    if (tableDiv.style.display !== "none") {
+        tableDiv.style.display = "none";
+        chartDiv.style.display = "block";
+        btn.innerHTML = "🔢 Ver Tabela";
+    } else {
+        tableDiv.style.display = "block";
+        chartDiv.style.display = "none";
+        btn.innerHTML = "📊 Ver Gráfico";
+    }
+}
+
 function renderizarResumoMensal(dados) {
-    const container = document.getElementById("tabelaMensalContainer");
+    const container = document.getElementById("viewMensalTable");
     const agrupado = {};
 
     dados.forEach(r => {
         const dateObj = parseDataBR(r.data);
         if (dateObj) {
-            const mesAno = dateObj.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+            const mesAno = dateObj.toLocaleDateString("pt-BR", { month: "short", year: "numeric" });
             const mesAnoFormatted = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
             agrupado[mesAnoFormatted] = (agrupado[mesAnoFormatted] || 0) + r.qtdExames;
         }
@@ -167,37 +185,100 @@ function renderizarResumoMensal(dados) {
     const chaves = Object.keys(agrupado);
     if (chaves.length === 0) {
         container.innerHTML = `<p class="sem-dados">Nenhum registro encontrado.</p>`;
+        atualizarGrafico('chartMensal', [], [], 'bar', 'Exames por Mês');
         return;
     }
 
+    // Montar tabela
     let html = `<table><thead><tr><th>Mês / Ano</th><th class="text-right">Qtd Exames</th></tr></thead><tbody>`;
     chaves.forEach(m => {
         html += `<tr><td>${m}</td><td class="text-right"><strong>${agrupado[m].toLocaleString("pt-BR")}</strong></td></tr>`;
     });
     html += `</tbody></table>`;
     container.innerHTML = html;
+
+    // Montar gráfico
+    atualizarGrafico('chartMensal', chaves, Object.values(agrupado), 'bar', 'Total de Exames');
 }
 
 function renderizarResumoSetor(dados) {
-    const container = document.getElementById("tabelaSetoresContainer");
+    const container = document.getElementById("viewSetorTable");
     const agrupado = {};
 
     dados.forEach(r => {
         agrupado[r.setor] = (agrupado[r.setor] || 0) + r.qtdExames;
     });
 
-    const chaves = Object.keys(agrupado);
-    if (chaves.length === 0) {
+    // Ordenar do maior para o menor
+    const chavesOrdenadas = Object.keys(agrupado).sort((a, b) => agrupado[b] - agrupado[a]);
+
+    if (chavesOrdenadas.length === 0) {
         container.innerHTML = `<p class="sem-dados">Nenhum registro encontrado.</p>`;
+        atualizarGrafico('chartSetor', [], [], 'doughnut', 'Exames por Setor');
         return;
     }
 
+    // Montar tabela
     let html = `<table><thead><tr><th>Setor</th><th class="text-right">Qtd Exames</th></tr></thead><tbody>`;
-    chaves.forEach(s => {
+    chavesOrdenadas.forEach(s => {
         html += `<tr><td>${s}</td><td class="text-right"><strong>${agrupado[s].toLocaleString("pt-BR")}</strong></td></tr>`;
     });
     html += `</tbody></table>`;
     container.innerHTML = html;
+
+    // Montar gráfico
+    const valores = chavesOrdenadas.map(k => agrupado[k]);
+    atualizarGrafico('chartSetor', chavesOrdenadas, valores, 'doughnut', 'Exames por Setor');
+}
+
+function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    
+    if (canvasId === 'chartMensal' && chartMensalInstancia) {
+        chartMensalInstancia.destroy();
+    }
+    if (canvasId === 'chartSetor' && chartSetorInstancia) {
+        chartSetorInstancia.destroy();
+    }
+
+    const paletaCores = [
+        '#3182ce', '#38a169', '#805ad5', '#dd6b20', 
+        '#e53e3e', '#d69e2e', '#319795', '#cbd5e0'
+    ];
+    
+    const bgColor = tipoGrafico === 'bar' ? '#3182ce' : paletaCores;
+
+    const config = {
+        type: tipoGrafico,
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelName,
+                data: data,
+                backgroundColor: bgColor,
+                borderWidth: 1,
+                borderColor: '#ffffff',
+                borderRadius: tipoGrafico === 'bar' ? 4 : 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: tipoGrafico !== 'bar', 
+                    position: 'right'
+                }
+            }
+        }
+    };
+
+    const novoGrafico = new Chart(ctx, config);
+    if (canvasId === 'chartMensal') {
+        chartMensalInstancia = novoGrafico;
+    } else {
+        chartSetorInstancia = novoGrafico;
+    }
 }
 
 function renderizarTabelaDetalhada(dados) {
@@ -225,11 +306,9 @@ function renderizarTabelaDetalhada(dados) {
     const ordenados = [...dados].sort((a, b) => parseDataBR(b.data) - parseDataBR(a.data));
 
     ordenados.forEach((r, idx) => {
-        // Verifica se há alguma anotação em observações
         const obsTexto = r.observacao || r.observacoes || "";
         const temObs = obsTexto.trim().length > 0;
 
-        // Se houver observação, cria o botão "💬 Obs"
         const btnObsHtml = temObs 
             ? `<button class="btn-obs" title="Ver Observação" onclick="abrirModalObs(${idx})">💬 Obs</button>` 
             : "";
@@ -254,7 +333,6 @@ function renderizarTabelaDetalhada(dados) {
     html += `</tbody></table>`;
     container.innerHTML = html;
 
-    // Guarda a lista atual ordenada para ser acessada pelo modal
     window.dadosAtuaisOrdenados = ordenados;
 }
 
