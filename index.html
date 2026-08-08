@@ -165,6 +165,25 @@
           <div id="tabelaDetalhadaContainer" class="table-responsive">
             <p class="sem-dados">Nenhum dado para o período selecionado.</p>
           </div>
+
+          <!-- CONTROLES DE PAGINAÇÃO -->
+          <div class="paginacao-container" id="paginacaoContainer" style="display: none;">
+            <div class="paginacao-info">
+              Mostrando <span id="pagInicio">0</span> a <span id="pagFim">0</span> de <span id="pagTotal">0</span> registros
+            </div>
+            <div class="paginacao-controles">
+              <label for="limitePagina">Linhas por pág:</label>
+              <select id="limitePagina" onchange="mudarLimitePagina()">
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="todos">Todos</option>
+              </select>
+              <button id="btnAnt" onclick="mudarPagina(-1)" class="btn-paginacao">⬅ Anterior</button>
+              <span id="pagAtualInfo">Pág. 1</span>
+              <button id="btnProx" onclick="mudarPagina(1)" class="btn-paginacao">Próxima ➡</button>
+            </div>
+          </div>
         </section>
 
       </main>
