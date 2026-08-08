@@ -9,6 +9,7 @@ body {
   background-color: #f0f2f5;
   color: #333;
   padding: 20px 10px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .container {
@@ -16,20 +17,57 @@ body {
   margin: 0 auto;
 }
 
-/* CABEÇALHO */
+/* ==========================================
+   ALINHAMENTO DO CABEÇALHO
+   ========================================== */
 .header {
-  text-align: center;
   margin-bottom: 25px;
+}
+
+.header-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.header-titulos {
+  text-align: left;
 }
 
 .header h1 {
   color: #1a365d;
   font-size: 1.8rem;
+  margin-bottom: 5px;
 }
 
 .header p {
   color: #626b7a;
   font-size: 0.95rem;
+}
+
+.btn-dark-mode {
+  background: #cbd5e0;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.3s;
+}
+
+.btn-dark-mode:hover {
+  background: #a0aec0;
+}
+
+@media (max-width: 600px) {
+  .header-topo { flex-direction: column; text-align: center; }
+  .header-titulos { text-align: center; }
 }
 
 /* CARREGANDO */
@@ -39,6 +77,7 @@ body {
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: background-color 0.3s;
 }
 
 .spinner {
@@ -63,6 +102,7 @@ body {
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
+  transition: background-color 0.3s;
 }
 
 .card h2, .card h3 {
@@ -120,6 +160,19 @@ body {
   border-radius: 6px;
   font-size: 0.9rem;
   background: white;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.campo-horarios-lado-a-lado {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.campo-horarios-lado-a-lado .subcampo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* BOTOES DE ACAO */
@@ -173,6 +226,7 @@ button {
   display: flex;
   flex-direction: column;
   border-left: 5px solid #2b6cb0;
+  transition: background-color 0.3s;
 }
 
 .kpi-card.azul { border-color: #3182ce; }
@@ -217,6 +271,7 @@ th, td {
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
   font-size: 0.9rem;
+  transition: background-color 0.3s;
 }
 
 th {
@@ -277,6 +332,7 @@ tr:hover {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   animation: modalFadeIn 0.2s ease-out;
+  transition: background-color 0.3s;
 }
 
 @keyframes modalFadeIn {
@@ -291,6 +347,7 @@ tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background-color 0.3s;
 }
 
 .modal-header h3 {
@@ -315,6 +372,7 @@ tr:hover {
   font-size: 0.95rem;
   line-height: 1.5;
   white-space: pre-wrap;
+  transition: color 0.3s;
 }
 
 /* MOBILE RESPONSIVO */
@@ -322,20 +380,8 @@ tr:hover {
   .grid-filtros { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
 }
-.campo-horarios-lado-a-lado {
-  display: flex;
-  gap: 10px;
-}
 
-.campo-horarios-lado-a-lado .subcampo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ==========================================
-   NOVOS ESTILOS PARA GRÁFICOS E BOTÕES DE TOGGLE
-   ========================================== */
+/* GRÁFICOS E BOTÕES DE TOGGLE */
 .card-header-flex {
   display: flex;
   justify-content: space-between;
@@ -372,4 +418,87 @@ tr:hover {
   position: relative;
   height: 280px; 
   width: 100%;
+}
+
+
+/* ==========================================
+   MODO ESCURO (DARK MODE)
+   ========================================== */
+body.dark-mode {
+  background-color: #1a202c;
+  color: #e2e8f0;
+}
+
+body.dark-mode .card,
+body.dark-mode .loading-box,
+body.dark-mode .kpi-card,
+body.dark-mode .modal-content {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .header h1,
+body.dark-mode .card h2, 
+body.dark-mode .card h3,
+body.dark-mode .kpi-valor,
+body.dark-mode .modal-header h3 {
+  color: #f7fafc;
+}
+
+body.dark-mode .header p,
+body.dark-mode .kpi-titulo,
+body.dark-mode .campo label {
+  color: #a0aec0;
+}
+
+body.dark-mode .campo input, 
+body.dark-mode .campo select {
+  background-color: #4a5568;
+  color: #f7fafc;
+  border-color: #718096;
+}
+
+body.dark-mode th {
+  background-color: #4a5568;
+  color: #f7fafc;
+  border-bottom: 1px solid #718096;
+}
+
+body.dark-mode td {
+  border-bottom: 1px solid #718096;
+}
+
+body.dark-mode tr:hover {
+  background-color: #3f4a5c;
+}
+
+body.dark-mode .btn-atalho,
+body.dark-mode .btn-toggle-view,
+body.dark-mode .btn-secundario {
+  background-color: #4a5568;
+  border-color: #718096;
+  color: #e2e8f0;
+}
+
+body.dark-mode .btn-atalho:hover,
+body.dark-mode .btn-toggle-view:hover,
+body.dark-mode .btn-secundario:hover {
+  background-color: #2b6cb0;
+  color: white;
+  border-color: #2b6cb0;
+}
+
+body.dark-mode .btn-dark-mode {
+  background: #4a5568;
+  color: #f7fafc;
+}
+
+body.dark-mode .modal-header {
+  background-color: #1a202c;
+  border-bottom: 1px solid #4a5568;
+}
+
+body.dark-mode .modal-body {
+  color: #e2e8f0;
 }
