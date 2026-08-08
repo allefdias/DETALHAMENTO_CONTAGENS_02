@@ -322,3 +322,13 @@ tr:hover {
   .grid-filtros { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: 1fr 1fr; }
 }
+.campo-horarios-lado-a-lado {
+  display: flex;
+  gap: 10px;
+}
+
+.campo-horarios-lado-a-lado .subcampo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
