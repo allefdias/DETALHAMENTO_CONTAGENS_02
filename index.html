@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Painel de Consulta de Exames</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="index.css">
+
+    <!-- JS -->
+    <script src="index.js" defer=""></script>
+    <script type="text/javascript" src="./index.js" defer=""></script>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+
+  <body>
+    <div class="container">
+
+      <!-- CABEÇALHO -->
+      <header class="header">
+        <h1>📊 Consulta &amp; Relatórios</h1>
+        <p>Acompanhamento quantitativo de procedimentos e exames</p>
+      </header>
+
+      <!-- CARREGANDO -->
+      <div id="loading" class="loading-box">
+        <div class="spinner"></div>
+        <p>Buscando dados da planilha...</p>
+      </div>
+
+      <!-- ÁREA PRINCIPAL DO PAINEL -->
+      <main id="dashboard" style="display: none;">
+
+        <!-- FILTROS -->
+        <section class="card filtro-card">
+          <h2>🔍 Filtros de Pesquisa</h2>
+
+          <!-- Atalhos Rápidos de Data -->
+          <div class="atalhos-data">
+            <button type="button" class="btn-atalho" onclick="setAtalhoData('este_mes')">Este Mês</button>
+            <button type="button" class="btn-atalho" onclick="setAtalhoData('30_dias')">Últimos 30 Dias</button>
+            <button type="button" class="btn-atalho" onclick="setAtalhoData('60_dias')">Últimos 60 Dias</button>
+            <button type="button" class="btn-atalho" onclick="setAtalhoData('todos')">Todo o Histórico</button>
+          </div>
+
+          <div class="grid-filtros">
+            <!-- Data Inicial -->
+            <div class="campo">
+              <label for="dataInicio">Data Inicial:</label>
+              <input type="date" id="dataInicio">
+            </div>
+
+            <!-- Data Final -->
+            <div class="campo">
+              <label for="dataFim">Data Final:</label>
+              <input type="date" id="dataFim">
+            </div>
+
+            <!-- Setor -->
+            <div class="campo">
+              <label for="filtroSetor">Setor:</label>
+              <select id="filtroSetor">
+                <option value="">Todos os Setores</option>
+              </select>
+            </div>
+
+            <!-- Funcionário -->
+            <div class="campo">
+              <label for="filtroFuncionario">Funcionário / Profissional:</label>
+              <select id="filtroFuncionario">
+                <option value="">Todos os Funcionários</option>
+              </select>
+            </div>
+
+            <!-- Horário Entrada -->
+            <div class="campo">
+              <label for="filtroEntrada">Horário Entrada:</label>
+              <input type="text" id="filtroEntrada" placeholder="Ex: 08:00">
+            </div>
+
+            <!-- Horário Saída -->
+            <div class="campo">
+              <label for="filtroSaida">Horário Saída:</label>
+              <input type="text" id="filtroSaida" placeholder="Ex: 17:00">
+            </div>
+          </div>
+
+          <div class="acoes-filtro">
+            <button class="btn-principal" onclick="aplicarFiltros()">🔍 Filtrar Dados</button>
+            <button class="btn-secundario" onclick="limparFiltros()">🔄 Limpar Filtros</button>
+          </div>
+        </section>
+
+        <!-- CARDS INFORMATIVOS (KPIs) -->
+        <section class="kpi-grid">
+          <div class="kpi-card azul">
+            <span class="kpi-titulo">Total de Exames</span>
+            <span class="kpi-valor" id="kpiTotalExames">0</span>
+          </div>
+
+          <div class="kpi-card verde">
+            <span class="kpi-titulo">Média / Profissional</span>
+            <span class="kpi-valor" id="kpiMediaProfissional">0</span>
+          </div>
+
+          <div class="kpi-card roxo">
+            <span class="kpi-titulo">Setores Com Registros</span>
+            <span class="kpi-valor" id="kpiTotalSetores">0</span>
+          </div>
+
+          <div class="kpi-card laranja">
+            <span class="kpi-titulo">Profissionais Ativos</span>
+            <span class="kpi-valor" id="kpiTotalFuncionarios">0</span>
+          </div>
+        </section>
+
+        <!-- RESUMO MENSAL E POR SETOR -->
+        <div class="grid-resumos">
+          <!-- Resumo Mensal -->
+          <section class="card">
+            <h3>📅 Quantitativo por Mês</h3>
+            <div id="tabelaMensalContainer" class="table-responsive">
+              <p class="sem-dados">Nenhum dado encontrado.</p>
+            </div>
+          </section>
+
+          <!-- Resumo Por Setor -->
+          <section class="card">
+            <h3>🏥 Quantitativo por Setor</h3>
+            <div id="tabelaSetoresContainer" class="table-responsive">
+              <p class="sem-dados">Nenhum dado encontrado.</p>
+            </div>
+          </section>
+        </div>
+
+        <!-- DETALHAMENTO DE REGISTROS -->
+        <section class="card">
+          <h3>📋 Registros Detalhados</h3>
+          <div id="tabelaDetalhadaContainer" class="table-responsive">
+            <p class="sem-dados">Nenhum dado para o período selecionado.</p>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+
+    <!-- POP-UP (MODAL) DE OBSERVAÇÕES -->
+    <div id="modalObs" class="modal-overlay" onclick="fecharModalObs(event)">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>💬 Observação do Plantão</h3>
+          <button class="modal-close" onclick="fecharModalObsDirect()">×</button>
+        </div>
+        <div class="modal-body">
+          <p id="modalObsTexto"></p>
+        </div>
+      </div>
+    </div>
+
+
+
+  </body>
+
+</html>
