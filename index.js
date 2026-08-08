@@ -2,13 +2,15 @@
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzavzMJiuJAgZEoixPnSWQPSz-_XwE2bZgWKznjAt3b0XK9d4uiOE6n6oBhWXw2JFn5hw/exec";
 let todosRegistros = [];
 
-// Variáveis para armazenar as instâncias dos gráficos
+// Variáveis de Gráficos e Paginação
 let chartMensalInstancia = null;
 let chartSetorInstancia = null;
+let currentPage = 1;
+let rowsPerPage = 20;
 
 /* ---------------- INITIALIZATION ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
-    verificarTema(); // Carrega a preferência de Modo Escuro salva no navegador
+    verificarTema(); 
     carregarDados();
 });
 
@@ -40,7 +42,6 @@ function toggleDarkMode() {
         Chart.defaults.color = '#666';
     }
     
-    // Atualiza as cores dos gráficos instantaneamente
     if (chartMensalInstancia) chartMensalInstancia.update();
     if (chartSetorInstancia) {
         chartSetorInstancia.data.datasets[0].borderColor = body.classList.contains('dark-mode') ? '#2d3748' : '#ffffff';
@@ -186,7 +187,11 @@ function atualizarDashboard(dados) {
 
     renderizarResumoMensal(dados);
     renderizarResumoSetor(dados);
-    renderizarTabelaDetalhada(dados);
+    
+    // Prepara a tabela e reseta a página sempre que realizar um novo filtro
+    window.dadosAtuaisOrdenados = [...dados].sort((a, b) => parseDataBR(b.data) - parseDataBR(a.data));
+    currentPage = 1; 
+    renderizarTabelaPaginada();
 }
 
 /* ---------------- LÓGICA DOS GRÁFICOS E TABELAS ---------------- */
@@ -278,8 +283,6 @@ function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
     ];
     
     const bgColor = tipoGrafico === 'bar' ? '#3182ce' : paletaCores;
-    
-    // Cor da borda dinâmica baseado no tema atual
     const isDarkMode = document.body.classList.contains('dark-mode');
     const borderDynamicColor = isDarkMode ? '#2d3748' : '#ffffff';
 
@@ -316,15 +319,53 @@ function atualizarGrafico(canvasId, labels, data, tipoGrafico, labelName) {
     }
 }
 
-/* ---------------- TABELA DETALHADA ---------------- */
-function renderizarTabelaDetalhada(dados) {
+/* ---------------- TABELA DETALHADA E PAGINAÇÃO ---------------- */
+function renderizarTabelaPaginada() {
     const container = document.getElementById("tabelaDetalhadaContainer");
+    const pagContainer = document.getElementById("paginacaoContainer");
+    const totalRegistros = window.dadosAtuaisOrdenados.length;
 
-    if (dados.length === 0) {
+    // Se não tiver dados, oculta a paginação e mostra aviso
+    if (totalRegistros === 0) {
         container.innerHTML = `<p class="sem-dados">Nenhum registro para exibir.</p>`;
+        pagContainer.style.display = "none";
         return;
     }
 
+    // Exibe a barra de paginação
+    pagContainer.style.display = "flex";
+
+    // Calcula Início e Fim baseado na página atual
+    let inicio = 0;
+    let fim = totalRegistros;
+    let dadosPagina = window.dadosAtuaisOrdenados;
+
+    if (rowsPerPage !== "todos") {
+        const limite = parseInt(rowsPerPage);
+        inicio = (currentPage - 1) * limite;
+        fim = Math.min(inicio + limite, totalRegistros);
+        dadosPagina = window.dadosAtuaisOrdenados.slice(inicio, fim);
+    }
+
+    // Atualiza os Textos da Barra de Paginação
+    document.getElementById("pagInicio").innerText = totalRegistros > 0 ? inicio + 1 : 0;
+    document.getElementById("pagFim").innerText = fim;
+    document.getElementById("pagTotal").innerText = totalRegistros;
+    document.getElementById("pagAtualInfo").innerText = rowsPerPage === "todos" ? "Pág. Única" : `Pág. ${currentPage}`;
+
+    // Habilita/Desabilita os Botões Anterior/Próxima
+    const btnAnt = document.getElementById("btnAnt");
+    const btnProx = document.getElementById("btnProx");
+    
+    if (rowsPerPage === "todos") {
+        btnAnt.disabled = true;
+        btnProx.disabled = true;
+    } else {
+        btnAnt.disabled = currentPage === 1;
+        btnProx.disabled = fim >= totalRegistros;
+    }
+
+    // Monta a Tabela
     let html = `
     <table>
       <thead>
@@ -337,16 +378,17 @@ function renderizarTabelaDetalhada(dados) {
         </tr>
       </thead>
       <tbody>
-  `;
+    `;
 
-    const ordenados = [...dados].sort((a, b) => parseDataBR(b.data) - parseDataBR(a.data));
-
-    ordenados.forEach((r, idx) => {
+    dadosPagina.forEach((r) => {
+        // Encontra o index exato no array principal para o Modal de Observação funcionar corretamente
+        const originalIndex = window.dadosAtuaisOrdenados.indexOf(r); 
+        
         const obsTexto = r.observacao || r.observacoes || "";
         const temObs = obsTexto.trim().length > 0;
 
         const btnObsHtml = temObs 
-            ? `<button class="btn-obs" title="Ver Observação" onclick="abrirModalObs(${idx})">💬 Obs</button>` 
+            ? `<button class="btn-obs" title="Ver Observação" onclick="abrirModalObs(${originalIndex})">💬 Obs</button>` 
             : "";
 
         const horaEntrada = r.entrada || r.horario || "-";
@@ -368,9 +410,21 @@ function renderizarTabelaDetalhada(dados) {
 
     html += `</tbody></table>`;
     container.innerHTML = html;
-
-    window.dadosAtuaisOrdenados = ordenados;
 }
+
+/* ---------------- FUNÇÕES DE CONTROLE DA PAGINAÇÃO ---------------- */
+function mudarPagina(direcao) {
+    currentPage += direcao;
+    renderizarTabelaPaginada();
+}
+
+function mudarLimitePagina() {
+    const select = document.getElementById("limitePagina");
+    rowsPerPage = select.value;
+    currentPage = 1; // Sempre volta para a primeira página ao alterar o limite
+    renderizarTabelaPaginada();
+}
+
 
 /* ---------------- FUNÇÕES DO MODAL DE OBSERVAÇÕES ---------------- */
 function abrirModalObs(index) {
